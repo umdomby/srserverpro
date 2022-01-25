@@ -49,7 +49,7 @@ const wss = new WebSocketServer({
     server: httpsServer
 });
 
-const dgram = require('dgram');
+//const dgram = require('dgram');
 
 const WebSocketSender = require("ws");
 const wsESP = new WebSocketSender('ws://93.125.10.70:81');
@@ -71,15 +71,15 @@ const start = async () => {
             console.log('The server is started, listening~');
             wsConnect.on('message', (message) => {
                 wsESP.send(message);
-                const PORT_UDP = 1234;
-                const HOST = '93.125.10.70';
-                const messageUDP = new Buffer('My KungFu is Good!');
-                const client = dgram.createSocket('udp4');
-                client.send(messageUDP, 0, messageUDP.length, PORT_UDP, HOST, function(err, bytes) {
-                    if (err) throw err;
-                    console.log('UDP message sent to ' + HOST +':'+ PORT_UDP);
-                    client.close();
-                });
+                // const PORT_UDP = 1234;
+                // const HOST = '93.125.10.70';
+                // const messageUDP = new Buffer('My KungFu is Good!');
+                // const client = dgram.createSocket('udp4');
+                // client.send(messageUDP, 0, messageUDP.length, PORT_UDP, HOST, function(err, bytes) {
+                //     if (err) throw err;
+                //     console.log('UDP message sent to ' + HOST +':'+ PORT_UDP);
+                //     client.close();
+                // });
 
                 console.log(`Server received: ${message}`);
                 wsConnect.send(`Server reply: ${message}`, (err) => {

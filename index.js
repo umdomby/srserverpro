@@ -52,7 +52,6 @@ const wss = new WebSocketServer({
 //const dgram = require('dgram');
 
 const WebSocketSender = require("ws");
-const wsESP = new WebSocketSender('ws://cyberbet.online:81');
 
 const start = async () => {
     try {
@@ -60,19 +59,20 @@ const start = async () => {
             .then(() => console.log("Successfully connect to MongoDB."))
             .catch(err => console.error("Connection error", err));
 
-        wsESP.on('open', function open() {
-            wss.send(JSON.stringify({
-                id: '1',
-                username: 'username',
-                method: "connection",
-            }));
-        });
+        const wsESP = new WebSocketSender('ws://cyberbet.online:81');
 
         wss.on('connection', (wsConnect) => {
-
+            wsESP.on('open', function open() {
+                wss.send(JSON.stringify({
+                    id: '1',
+                    username: 'username',
+                    method: "connection",
+                }));
+            });
             console.log('The server is started, listening~');
             wsConnect.on('message', (message) => {
                 wsESP.send(message);
+
                 // const PORT_UDP = 1234;
                 // const HOST = '93.125.10.70';
                 // const messageUDP = new Buffer('My KungFu is Good!');

@@ -45,11 +45,9 @@ const httpServer = http.createServer(app);
 const httpsServer = https.createServer(credentials, app);
 
 
-const wss = new WebSocketServer({
-    server: httpsServer
-});
 
-//const dgram = require('dgram');
+
+
 
 const WebSocketSender = require("ws");
 
@@ -59,20 +57,35 @@ const start = async () => {
             .then(() => console.log("Successfully connect to MongoDB."))
             .catch(err => console.error("Connection error", err));
 
+        const wss = new WebSocketServer({server: httpsServer});
         const wsESP = new WebSocketSender('ws://cyberbet.online:81');
 
         wss.on('connection', (wsConnect) => {
-            wsESP.on('open', function open() {
-                wss.send(JSON.stringify({
-                    id: '1',
-                    username: 'username',
-                    method: "connection",
-                }));
+            wsConnect.on('connection', (message) => {
+                wsESP.on('open', function open() {
+                    wsESP.send(JSON.stringify({
+                        id: message.id,
+                        username: message.username,
+                        method: message.method,
+                    }));
+                });
             });
+
+            // wsESP.onmessage = function(event) {
+            //     console.log("Arduino reply: " + event.data);
+            //     wsConnect.send(`Arduino reply: ${event.data}`, (err) => {
+            //         if (err) {
+            //             console.log(`Server error: ${err}`);
+            //         }
+            //     });
+            // };
+
             console.log('The server is started, listening~');
+
             wsConnect.on('message', (message) => {
                 wsESP.send(message);
 
+                //const dgram = require('dgram');
                 // const PORT_UDP = 1234;
                 // const HOST = '93.125.10.70';
                 // const messageUDP = new Buffer('My KungFu is Good!');
@@ -84,11 +97,20 @@ const start = async () => {
                 // });
 
                 console.log(`Server received: ${message}`);
-                wsConnect.send(`Server reply: ${message}`, (err) => {
-                    if (err) {
-                        console.log(`Server error: ${err}`);
-                    }
-                });
+                wsESP.onmessage = function(event) {
+                    console.log("Arduino reply: " + event.data);
+                    wsConnect.send(`Arduino reply: ${event.data}`, (err) => {
+                        if (err) {
+                            console.log(`Server error: ${err}`);
+                        }
+                    });
+                };
+
+                // wsConnect.send(`Server reply: ${message}`, (err) => {
+                //     if (err) {
+                //         console.log(`Server error: ${err}`);
+                //     }
+                // });
             });
         });
 

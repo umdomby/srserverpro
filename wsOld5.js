@@ -21,13 +21,18 @@ app.use(express.static(path.resolve(__dirname, 'static')))
 app.use(fileUpload({}))
 app.use('/api', router)
 
-const privateKey = fs.readFileSync(path.resolve(__dirname,'./cert/servicerobotpro/privkey.pem'));
-const certificate = fs.readFileSync(path.resolve(__dirname,'./cert/servicerobotpro/cert.pem'));
-const ca = fs.readFileSync(path.resolve(__dirname,'./cert/servicerobotpro/chain.pem'));
+// Certificate
+// const privateKey = fs.readFileSync('/etc/letsencrypt/live/cyberbet.online/umdombykey.pem', 'utf8');
+// const certificate = fs.readFileSync('/etc/letsencrypt/live/cyberbet.online/umdombycert.pem', 'utf8');
+// const ca = fs.readFileSync('/etc/letsencrypt/live/cyberbet.online/umdombychain.pem', 'utf8');
 
-// const privateKey = fs.readFileSync(path.resolve(__dirname,'./cert/cyberbetonline/cyberbetonlinekey.pem'));
-// const certificate = fs.readFileSync(path.resolve(__dirname,'./cert/cyberbetonline/cyberbetonlinecert.pem'));
-// const ca = fs.readFileSync(path.resolve(__dirname,'./cert/cyberbetonline/cyberbetonlinechain.pem'));
+// const privateKey = fs.readFileSync(path.resolve(__dirname,'./cert/umdomby/umdombykey.pem'));
+// const certificate = fs.readFileSync(path.resolve(__dirname,'./cert/umdomby/umdombycert.pem'));
+// const ca = fs.readFileSync(path.resolve(__dirname,'./cert/umdomby/umdombychain.pem'));
+
+const privateKey = fs.readFileSync(path.resolve(__dirname,'./cert/cyberbetonline/cyberbetonlinekey.pem'));
+const certificate = fs.readFileSync(path.resolve(__dirname,'./cert/cyberbetonline/cyberbetonlinecert.pem'));
+const ca = fs.readFileSync(path.resolve(__dirname,'./cert/cyberbetonline/cyberbetonlinechain.pem'));
 
 const credentials = {
     key: privateKey,
@@ -44,8 +49,8 @@ const httpServer = http.createServer(app);
 const httpsServer = https.createServer(credentials, app);
 
 const WebSocket = require('ws');
-//var ws = new WebSocket('ws://192.168.0.107:81');
-//ws.on('error', err => { console.error(err) })
+var ws = new WebSocket('ws://192.168.0.107:81');
+ws.on('error', err => { console.error(err) })
 
 const start = async () => {
     try {
@@ -66,28 +71,26 @@ const start = async () => {
 
             console.log('Новый пользователь wss');
 
-            // if(ws.readyState === 1) {
-            //     ws.on('open', function open() {
-            //         ws.send(JSON.stringify({
-            //             username: 'user',
-            //             method: "connection",
-            //         }));
-            //     });
-            //
-            //     ws.on('message', function message(data) {
-            //         wsClient.send(data);
-            //         console.log('received: %s', data);
-            //     });
-            // }
+            if(ws.readyState === 1) {
+                ws.on('open', function open() {
+                    ws.send(JSON.stringify({
+                        username: 'user',
+                        method: "connection",
+                    }));
+                });
+
+                ws.on('message', function message(data) {
+                    wsClient.send(data);
+                    console.log('received: %s', data);
+                });
+            }
 
             wsClient.on('message', function(message) {
-                wsClient.send(message)
-                // if(ws.readyState === 1){
-                //     ws.send(message);
-                // }
+                if(ws.readyState === 1){
+                    ws.send(message);
+                }
                 console.log('подключился к ардуино wss: ' + message);
             })
-
         }
 
         httpServer.listen(8080, () => {

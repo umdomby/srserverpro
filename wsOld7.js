@@ -54,9 +54,8 @@ const start = async () => {
             .catch(err => console.error("Connection error", err));
 
         const wss = new WebSocketServer({server: httpsServer});
-
-        wss.on('connection', ws => {
-            ws.on('message', msg => {
+        wss.on('connection', client => {
+            client.on('message', msg => {
                 msg = JSON.parse(msg)
                 switch (msg.method) {
                     case "connection":
@@ -70,15 +69,8 @@ const start = async () => {
                             accel:1,
                             languages:'ru-RU'
                         })
-                        //ws.send(mess)
+                        //client.send(mess)
                         console.log('connection ' + msg.id + '|' + msg.username)
-                        ws.id = msg.id
-                        wss.clients.forEach(function each(client) {
-                            if (client.id === ws.id && client.readyState === client.OPEN) {
-                                client.send(mess);
-                            }
-                        });
-
                         //connectionHandler2(client, msg, mess);
                         break
                     case "messages":
@@ -88,14 +80,8 @@ const start = async () => {
                             message2: msg.message2,
                             stop: 0
                         })
-                        ws.id = msg.id
-                        wss.clients.forEach(function each(client) {
-                            if (client.id === ws.id && client.readyState === client.OPEN) {
-                                client.send(mess2);
-                            }
-                        });
-                        //ws.send(mess2)
-                        //broadcastConnection2(mess2)
+                        //client.send(mess2)
+                        broadcastConnection2(mess2)
                         console.log(msg.id + '|' + msg.message + '|' + msg.message2)
                         break
                 }
@@ -116,12 +102,12 @@ const start = async () => {
         //         }
         //     })
         // }
-        //
-        // broadcastConnection2 = (mess2) => {
-        //     wss.clients.forEach(client => {
-        //         client.send(mess2)
-        //     })
-        // }
+
+        broadcastConnection2 = (mess2) => {
+            wss.clients.forEach(client => {
+                client.send(mess2)
+            })
+        }
 
         httpServer.listen(8080, () => {
             console.log('HTTP Server running on port 8080');

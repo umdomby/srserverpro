@@ -64,10 +64,10 @@ const start = async () => {
                             method: 'connection',
                             username: msg.username,
                             txt:'txt',
-                            degreegoback:2,
-                            degreeleftright:1,
-                            delaycommand:1,
-                            accel:1,
+                            degreegoback:'1',
+                            degreeleftright:'1',
+                            delaycommand:'0',
+                            accel:'1',
                             languages:'ru-RU'
                         })
                         //ws.send(mess)
@@ -86,7 +86,8 @@ const start = async () => {
                             method: 'messages',
                             message: msg.message,
                             message2: msg.message2,
-                            stop: 0
+                            accel: msg.accel,
+                            stop: msg.stop,
                         })
                         ws.id = msg.id
                         wss.clients.forEach(function each(client) {

@@ -53,16 +53,9 @@ const start = async () => {
             .then(() => console.log("Successfully connect to MongoDB."))
             .catch(err => console.error("Connection error", err));
 
-        // ws.on('message', function message(data) {
-        //     init_data = data
-        //     console.log('received: %s', data);
-        // });
-        //setInterval(() => socketTest(ws.readyState), 5000)
-
         const wss = new WebSocketServer({server: httpsServer});
-        wss.on('connection', ws => {
-            //ws.id = uuidv4()
-            ws.on('message', msg => {
+        wss.on('connection', client => {
+            client.on('message', msg => {
                 msg = JSON.parse(msg)
                 switch (msg.method) {
                     case "connection":
@@ -76,8 +69,9 @@ const start = async () => {
                             accel:1,
                             languages:'ru-RU'
                         })
-                        connectionHandler2(ws, msg, mess);
-                        console.log('connection')
+                        //client.send(mess)
+                        console.log('connection ' + msg.id + '|' + msg.username)
+                        //connectionHandler2(client, msg, mess);
                         break
                     case "messages":
                         let mess2 = JSON.stringify({
@@ -86,31 +80,38 @@ const start = async () => {
                             message2: msg.message2,
                             stop: 0
                         })
-                        broadcastConnection2(msg, mess2)
-                        console.log(msg.message + '|' + msg.message2)
+                        //client.send(mess2)
+                        broadcastConnection2(mess2)
+                        console.log(msg.id + '|' + msg.message + '|' + msg.message2)
                         break
                 }
             })
         })
 
-        connectionHandler2 = (ws, msg, mess) => {
-            ws.id = msg.id
-            ws.username = msg.username
-            broadcastConnection2(msg, mess)
-        }
 
-        broadcastConnection2 = (msg, mess) => {
+        // connectionHandler2 = (client, msg, mess) => {
+        //     client.id = msg.id
+        //     //ws.username = msg.username
+        //     broadcastConnection2(msg, mess)
+        // }
+        //
+        // broadcastConnection2 = (msg, mess) => {
+        //     wss.clients.forEach(client => {
+        //         if (client.id === msg.id) {
+        //             client.send(mess)
+        //         }
+        //     })
+        // }
+
+        broadcastConnection2 = (mess2) => {
             wss.clients.forEach(client => {
-                if (client.id === msg.id) {
-                    client.send(mess)
-                }
+                client.send(mess2)
             })
         }
 
         httpServer.listen(8080, () => {
             console.log('HTTP Server running on port 8080');
         });
-
         httpsServer.listen(4433, () => {
             console.log('HTTPS Server running on port 4433');
         });
@@ -121,20 +122,3 @@ const start = async () => {
 }
 
 start()
-
-
-const socketTest = (readyState) => {
-    console.log('socketTest')
-    // if(readyState !== 1) {
-    //     console.log('11111111111111')
-    //     ws = new WebSocket('ws://192.168.0.107:81');
-    //     if(readyState === 1) {
-    //         ws.on('open', function open() {
-    //                 ws.send(JSON.stringify({
-    //                     username: 'user',
-    //                     method: "connection",
-    //                 }));
-    //             })
-    //         }
-    // };
-}

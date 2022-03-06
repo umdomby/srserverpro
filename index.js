@@ -20,13 +20,13 @@ app.use(express.static(path.resolve(__dirname, 'static')))
 app.use(fileUpload({}))
 app.use('/api', router)
 
-const privateKey = fs.readFileSync(path.resolve(__dirname,'./cert/servicerobotpro/privkey.pem'));
-const certificate = fs.readFileSync(path.resolve(__dirname,'./cert/servicerobotpro/cert.pem'));
-const ca = fs.readFileSync(path.resolve(__dirname,'./cert/servicerobotpro/chain.pem'));
+// const privateKey = fs.readFileSync(path.resolve(__dirname,'./cert/servicerobotpro/privkey.pem'));
+// const certificate = fs.readFileSync(path.resolve(__dirname,'./cert/servicerobotpro/cert.pem'));
+// const ca = fs.readFileSync(path.resolve(__dirname,'./cert/servicerobotpro/chain.pem'));
 
-// const privateKey = fs.readFileSync(path.resolve(__dirname,'./cert/umdomby/privkey.pem'));
-// const certificate = fs.readFileSync(path.resolve(__dirname,'./cert/umdomby/cert.pem'));
-// const ca = fs.readFileSync(path.resolve(__dirname,'./cert/umdomby/chain.pem'));
+const privateKey = fs.readFileSync(path.resolve(__dirname,'./cert/umdomby/privkey.pem'));
+const certificate = fs.readFileSync(path.resolve(__dirname,'./cert/umdomby/cert.pem'));
+const ca = fs.readFileSync(path.resolve(__dirname,'./cert/umdomby/chain.pem'));
 
 const credentials = {
     key: privateKey,
@@ -58,12 +58,29 @@ const start = async () => {
         const wsa = new WebSocketServer({server: httpServer});
         wsa.on('connection', ws => {
             global.wsg = ws
-            console.log('Новый пользователь arduino');
             ws.send('connected WS server')
             ws.on('message', msg => {
-              console.log("arduino " + msg)
+              //console.log("arduino " + msg)
                 //ws.send('123123')
+                msg = JSON.parse(msg)
+                switch (msg.method) {
+                    case "connection":
+                        wsg.id = msg.id
+                        console.log('Connected Arduino id ' + msg.id)
+                        break;
+                    case "messages":
+                        console.log('Arduino '+ msg.id + '|' + msg.message + '|' + msg.message2)
+                        // wsa.clients.forEach(function each(client) {
+                        //     console.log('client.id arduino ' + client.id)
+                        //
+                        //     // if (client.id === wsg.id && client.readyState === client.OPEN) {
+                        //     //     wsg.send(mess2)
+                        //     // }
+                        // });
+                        break;
+                }
             })
+
         })
 
         // wsa.on('connection', onConnect);
@@ -96,13 +113,23 @@ const start = async () => {
                             languages:'ru-RU'
                         })
                         //ws.send(mess)
-                        console.log('connection ' + msg.id + '|' + msg.username)
+                        //console.log('connection ' + msg.id + '|' + msg.username)
+                        console.log('Connected Chrome id ' + msg.id)
                         ws.id = msg.id
+                        // wss.clients.forEach(function each(client) {
+                        //     if (client.id === ws.id && client.readyState === client.OPEN) {
+                        //         client.send(mess);
+                        //     }
+                        // });
+
                         wss.clients.forEach(function each(client) {
-                            if (client.id === ws.id && client.readyState === client.OPEN) {
-                                client.send(mess);
-                            }
+                            console.log('client.id forEach Chrome ' + client.id)
                         });
+
+                        wsa.clients.forEach(function each(client) {
+                            console.log('client.id forEach arduino ' + client.id)
+                        });
+
                         break
 
                     case "messages":
@@ -113,16 +140,22 @@ const start = async () => {
                             accel: msg.accel,
                             stop: msg.stop,
                         })
-                        ws.id = msg.id
-                        wss.clients.forEach(function each(client) {
+                        console.log('Chrome '+ msg.id + '|' + msg.message + '|' + msg.message2)
+
+                        // wss.clients.forEach(function each(client) {
+                        //     // console.log('client.id forEach Chrome ' + client.id)
+                        //     // if (client.id === ws.id && client.readyState === client.OPEN) {
+                        //     //     client.send(mess2);
+                        //     // }
+                        // });
+
+                        wsa.clients.forEach(function each(client) {
+                            //console.log('client.id forEach arduino ' + client.id)
                             if (client.id === ws.id && client.readyState === client.OPEN) {
-                                client.send(mess2);
+                                wsg.send(mess2)
                             }
                         });
-                        console.log(msg.id + '|' + msg.message + '|' + msg.message2)
-                        // arduino = mess2
-                        // console.log(arduino)
-                        wsg.send(mess2)
+                        // wsg.send(mess2)
                         break
                 }
             })

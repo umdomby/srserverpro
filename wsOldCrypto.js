@@ -26,14 +26,12 @@ class Encrypter {
     }
 }
 const encrypter = new Encrypter("syndicate_robotics_123");
-// const clearText = "123DAdda3";
+// const clearText = "123";
 // const encrypted = encrypter.encrypt(clearText);
 // console.log('1 ' + encrypted)
 // const dencrypted = encrypter.dencrypt(encrypted);
 // console.log('2 ' + clearText);
 // console.log('3 ' + dencrypted);
-
-
 
 const fs = require('fs');
 const http = require('http');
@@ -100,6 +98,7 @@ const start = async () => {
                 msg = JSON.parse(msg)
                 switch (msg.method) {
                     case "connection":
+
                         const dencrypted = encrypter.dencrypt(msg.id);
                         wsg.id = dencrypted
                         console.log('Connected Arduino id ' + dencrypted)
@@ -119,54 +118,32 @@ const start = async () => {
 
         })
 
-        // wsa.on('connection', onConnect);
-        // function onConnect(wsClient) {
-        //     console.log('Новый пользователь arduino');
-        //     wsClient.send('Привет от сервера');
-        //     global.wsg = wsClient
-        //     // wsClient.onmessage = function (message) {
-        //     //     console.log('Message: %s', message.data);
-        //     // };
-        //     wsClient.on('message', function(message) {
-        //         console.log('Message: %s', message);
-        //     })
-        // }
-
         const wss = new WebSocketServer({server: httpsServer});
         wss.on('connection', ws => {
             ws.on('message', msg => {
                 msg = JSON.parse(msg)
                 switch (msg.method) {
                     case "connection":
-                        const mess = JSON.stringify({
-                            method: 'connection',
-                            username: msg.username,
-                            txt:'txt',
-                            degreegoback:'1',
-                            degreeleftright:'1',
-                            delaycommand:'0',
-                            accel:'1',
-                            languages:'ru-RU'
-                        })
-                        //ws.send(mess)
-                        //console.log('connection ' + msg.id + '|' + msg.username)
                         console.log('Connected Chrome id ' + msg.id)
+
                         ws.id = msg.id
                         // wss.clients.forEach(function each(client) {
                         //     if (client.id === ws.id && client.readyState === client.OPEN) {
                         //         client.send(mess);
                         //     }
                         // });
-
                         wss.clients.forEach(function each(client) {
                             console.log('client.id forEach Chrome ' + client.id)
                         });
-
                         wsa.clients.forEach(function each(client) {
                             console.log('client.id forEach arduino ' + client.id)
                         });
-
-                        break
+                        const mess = JSON.stringify({
+                            method: 'connection',
+                            id: msg.id,
+                        })
+                        ws.send(mess)
+                        break;
 
                     case "messages":
                         let mess2 = JSON.stringify({
@@ -184,32 +161,17 @@ const start = async () => {
                         //     //     client.send(mess2);
                         //     // }
                         // });
-
+                        ws.send(mess2)
                         wsa.clients.forEach(function each(client) {
                             //console.log('client.id forEach arduino ' + client.id)
                             if (client.id === ws.id && client.readyState === client.OPEN) {
                                 wsg.send(mess2)
                             }
                         });
-                        // wsg.send(mess2)
-                        break
+                        break;
                 }
             })
         })
-
-        // wsa.on('connection', ws => {
-        //     ws.on('message', msg => {
-        //         msg = JSON.parse(msg)
-        //         switch (msg.method) {
-        //             case "connection":
-        //                 console.log('connection ' + msg.id + '|' + msg.username)
-        //                 break
-        //             case "messages":
-        //                 ws.send(arduino)
-        //                 break
-        //         }
-        //     })
-        // })
 
         httpServer.listen(81, () => {
             console.log('HTTP Server running on port 81');

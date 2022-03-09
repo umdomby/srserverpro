@@ -26,7 +26,7 @@ class Encrypter {
     }
 }
 const encrypter = new Encrypter("syndicate_robotics_123");
-// const clearText = "123DAdda3";
+// const clearText = "123";
 // const encrypted = encrypter.encrypt(clearText);
 // console.log('1 ' + encrypted)
 // const dencrypted = encrypter.dencrypt(encrypted);
@@ -98,6 +98,7 @@ const start = async () => {
                 msg = JSON.parse(msg)
                 switch (msg.method) {
                     case "connection":
+
                         const dencrypted = encrypter.dencrypt(msg.id);
                         wsg.id = dencrypted
                         console.log('Connected Arduino id ' + dencrypted)
@@ -117,19 +118,6 @@ const start = async () => {
 
         })
 
-        // wsa.on('connection', onConnect);
-        // function onConnect(wsClient) {
-        //     console.log('Новый пользователь arduino');
-        //     wsClient.send('Привет от сервера');
-        //     global.wsg = wsClient
-        //     // wsClient.onmessage = function (message) {
-        //     //     console.log('Message: %s', message.data);
-        //     // };
-        //     wsClient.on('message', function(message) {
-        //         console.log('Message: %s', message);
-        //     })
-        // }
-
         const wss = new WebSocketServer({server: httpsServer});
         wss.on('connection', ws => {
             ws.on('message', msg => {
@@ -137,6 +125,7 @@ const start = async () => {
                 switch (msg.method) {
                     case "connection":
                         console.log('Connected Chrome id ' + msg.id)
+
                         ws.id = msg.id
                         // wss.clients.forEach(function each(client) {
                         //     if (client.id === ws.id && client.readyState === client.OPEN) {
@@ -149,6 +138,11 @@ const start = async () => {
                         wsa.clients.forEach(function each(client) {
                             console.log('client.id forEach arduino ' + client.id)
                         });
+                        const mess = JSON.stringify({
+                            method: 'connection',
+                            id: msg.id,
+                        })
+                        ws.send(mess)
                         break;
 
                     case "messages":
@@ -167,7 +161,7 @@ const start = async () => {
                         //     //     client.send(mess2);
                         //     // }
                         // });
-
+                        ws.send(mess2)
                         wsa.clients.forEach(function each(client) {
                             //console.log('client.id forEach arduino ' + client.id)
                             if (client.id === ws.id && client.readyState === client.OPEN) {

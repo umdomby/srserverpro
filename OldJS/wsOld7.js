@@ -8,8 +8,8 @@ require('dotenv').config()
 const mongoose = require('mongoose')
 const cors = require('cors')
 const fileUpload = require('express-fileupload')
-const router = require('./routes/index')
-const errorHandler = require('./middleware/ErrorHandlingMiddleware')
+const router = require('../routes')
+const errorHandler = require('../middleware/ErrorHandlingMiddleware')
 
 const path = require('path')
 const app = express();
@@ -20,13 +20,13 @@ app.use(express.static(path.resolve(__dirname, 'static')))
 app.use(fileUpload({}))
 app.use('/api', router)
 
-// const privateKey = fs.readFileSync(path.resolve(__dirname,'./cert/servicerobotpro/privkey.pem'));
-// const certificate = fs.readFileSync(path.resolve(__dirname,'./cert/servicerobotpro/cert.pem'));
-// const ca = fs.readFileSync(path.resolve(__dirname,'./cert/servicerobotpro/chain.pem'));
+const privateKey = fs.readFileSync(path.resolve(__dirname,'./cert/servicerobotpro/privkey.pem'));
+const certificate = fs.readFileSync(path.resolve(__dirname,'./cert/servicerobotpro/cert.pem'));
+const ca = fs.readFileSync(path.resolve(__dirname,'./cert/servicerobotpro/chain.pem'));
 
-const privateKey = fs.readFileSync(path.resolve(__dirname,'./cert/umdomby/privkey.pem'));
-const certificate = fs.readFileSync(path.resolve(__dirname,'./cert/umdomby/cert.pem'));
-const ca = fs.readFileSync(path.resolve(__dirname,'./cert/umdomby/chain.pem'));
+// const privateKey = fs.readFileSync(path.resolve(__dirname,'./cert/umdomby/privkey.pem'));
+// const certificate = fs.readFileSync(path.resolve(__dirname,'./cert/umdomby/cert.pem'));
+// const ca = fs.readFileSync(path.resolve(__dirname,'./cert/umdomby/chain.pem'));
 
 const credentials = {
     key: privateKey,
@@ -42,9 +42,9 @@ app.use((req, res) => {
 const httpServer = http.createServer(app);
 const httpsServer = https.createServer(credentials, app);
 
-//const WebSocket = require('ws');
-
-//global.arduino = {};
+// const WebSocket = require('ws');
+// var ws = new WebSocket('ws://192.168.0.107:81');
+// ws.on('error', err => { console.error(err) })
 
 const start = async () => {
     try {
@@ -52,34 +52,8 @@ const start = async () => {
             .then(() => console.log("Successfully connect to MongoDB."))
             .catch(err => console.error("Connection error", err));
 
-        // var wsa = new WebSocket('ws://192.168.0.107:81');
-        // wsa.on('error', err => { console.error(err) })
-
-        // const wsa = new WebSocketServer({server: httpServer});
-        // wsa.on('connection', ws => {
-        //     //global.wsg = ws
-        //     console.log('Новый пользователь arduino');
-        //     ws.send('connected WS server')
-        //     ws.on('message', msg => {
-        //       console.log("arduino " + msg)
-        //         //ws.send('123123')
-        //     })
-        // })
-
-        // wsa.on('connection', onConnect);
-        // function onConnect(wsClient) {
-        //     console.log('Новый пользователь arduino');
-        //     wsClient.send('Привет от сервера');
-        //     global.wsg = wsClient
-        //     // wsClient.onmessage = function (message) {
-        //     //     console.log('Message: %s', message.data);
-        //     // };
-        //     wsClient.on('message', function(message) {
-        //         console.log('Message: %s', message);
-        //     })
-        // }
-
         const wss = new WebSocketServer({server: httpsServer});
+
         wss.on('connection', ws => {
             ws.on('message', msg => {
                 msg = JSON.parse(msg)
@@ -103,8 +77,9 @@ const start = async () => {
                                 client.send(mess);
                             }
                         });
-                        break
 
+                        //connectionHandler2(client, msg, mess);
+                        break
                     case "messages":
                         let mess2 = JSON.stringify({
                             method: 'messages',
@@ -119,31 +94,37 @@ const start = async () => {
                                 client.send(mess2);
                             }
                         });
+                        //ws.send(mess2)
+                        //broadcastConnection2(mess2)
                         console.log(msg.id + '|' + msg.message + '|' + msg.message2)
-                        // arduino = mess2
-                        // console.log(arduino)
-                        // wsg.send(mess2)
                         break
                 }
             })
         })
 
-        // wsa.on('connection', ws => {
-        //     ws.on('message', msg => {
-        //         msg = JSON.parse(msg)
-        //         switch (msg.method) {
-        //             case "connection":
-        //                 console.log('connection ' + msg.id + '|' + msg.username)
-        //                 break
-        //             case "messages":
-        //                 ws.send(arduino)
-        //                 break
+
+        // connectionHandler2 = (client, msg, mess) => {
+        //     client.id = msg.id
+        //     //ws.username = msg.username
+        //     broadcastConnection2(msg, mess)
+        // }
+        //
+        // broadcastConnection2 = (msg, mess) => {
+        //     wss.clients.forEach(client => {
+        //         if (client.id === msg.id) {
+        //             client.send(mess)
         //         }
         //     })
-        // })
+        // }
+        //
+        // broadcastConnection2 = (mess2) => {
+        //     wss.clients.forEach(client => {
+        //         client.send(mess2)
+        //     })
+        // }
 
-        httpServer.listen(81, () => {
-            console.log('HTTP Server running on port 81');
+        httpServer.listen(8080, () => {
+            console.log('HTTP Server running on port 8080');
         });
         httpsServer.listen(4433, () => {
             console.log('HTTPS Server running on port 4433');

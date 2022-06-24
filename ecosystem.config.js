@@ -1,6 +1,6 @@
 module.exports = {
   apps : [{
-    name   : "srs",
+    name   : "server",
     script : "./index.js",
     watch: true,
     //watch_delay: 1000,

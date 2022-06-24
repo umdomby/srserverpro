@@ -9,8 +9,8 @@ require('dotenv').config()
 const mongoose = require('mongoose')
 const cors = require('cors')
 const fileUpload = require('express-fileupload')
-const router = require('./routes/index')
-const errorHandler = require('./middleware/ErrorHandlingMiddleware')
+const router = require('../routes')
+const errorHandler = require('../middleware/ErrorHandlingMiddleware')
 
 const path = require('path')
 const app = express();

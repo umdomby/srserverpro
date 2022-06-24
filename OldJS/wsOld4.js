@@ -9,8 +9,8 @@ require('dotenv').config()
 const mongoose = require('mongoose')
 const cors = require('cors')
 const fileUpload = require('express-fileupload')
-const router = require('./routes/index')
-const errorHandler = require('./middleware/ErrorHandlingMiddleware')
+const router = require('../routes')
+const errorHandler = require('../middleware/ErrorHandlingMiddleware')
 
 const path = require('path')
 const app = express();
@@ -70,20 +70,24 @@ const start = async () => {
             wsClient.send('Привет');
 
             wsClient.on('message', function(message) {
-
                 const PORT_UDP = 1234;
-                const HOST = '93.125.10.70';
-                const messageUDP = new Buffer(message);
+                //const HOST = '93.125.10.70';
+                //const HOST = '192.168.0.107';
+                const HOST = '375297852236.dyndns.mts.by';
+                const messageUDP = new Buffer.from(message);
+                console.log('message: ' + message);
+                wsClient.send(message);
                 const client = dgram.createSocket('udp4');
-                client.send(messageUDP, 0, messageUDP.length, PORT_UDP, HOST, function(err, bytes) {
-                    if (err) throw err;
-                    console.log('UDP message sent to ' + HOST +':'+ PORT_UDP);
-                    client.close();
-                });
-                console.log('подключился к ардуино');
-                /* обработчик сообщений от клиента */
+                    client.send(messageUDP, 0, messageUDP.length, PORT_UDP, HOST, function(err, bytes) {
+                        //if (err) throw err;
+                        if (err){
+                            console.log('не подключился к: ');
+                        }
+                        console.log('UDP message sent to ' + HOST +':'+ PORT_UDP);
+                        client.close();
+                    });
+                    console.log('подключился к ардуино');
             })
-
         }
 
         httpServer.listen(80, () => {

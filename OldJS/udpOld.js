@@ -9,8 +9,8 @@ require('dotenv').config()
 const mongoose = require('mongoose')
 const cors = require('cors')
 const fileUpload = require('express-fileupload')
-const router = require('./routes/index')
-const errorHandler = require('./middleware/ErrorHandlingMiddleware')
+const router = require('../routes')
+const errorHandler = require('../middleware/ErrorHandlingMiddleware')
 
 const path = require('path')
 const app = express();
@@ -48,9 +48,10 @@ app.use((req, res) => {
 const httpServer = http.createServer(app);
 const httpsServer = https.createServer(credentials, app);
 
-const WebSocket = require('ws');
-var ws = new WebSocket('ws://192.168.0.107:81');
-ws.on('error', err => { console.error(err) })
+
+// const WebSocketSender = require("ws");
+
+const dgram = require('dgram');
 
 const start = async () => {
     try {
@@ -58,47 +59,39 @@ const start = async () => {
             .then(() => console.log("Successfully connect to MongoDB."))
             .catch(err => console.error("Connection error", err));
 
-        // ws.on('message', function message(data) {
-        //     init_data = data
-        //     console.log('received: %s', data);
-        // });
-        //setInterval(() => socketTest(ws.readyState), 5000)
-
         const wss = new WebSocketServer({server: httpsServer});
+        // const wsESP = new WebSocketSender('ws://93.125.10.70:81');
+
         wss.on('connection', onConnect);
 
         function onConnect(wsClient) {
+            console.log('Новый пользователь');
 
-            console.log('Новый пользователь wss');
-
-            if(ws.readyState === 1) {
-                ws.on('open', function open() {
-                    ws.send(JSON.stringify({
-                        username: 'user',
-                        method: "connection",
-                    }));
-                });
-
-                ws.on('message', function message(data) {
-                    wsClient.send(data);
-                    console.log('received: %s', data);
-                });
-            }
+            wsClient.send('Привет');
 
             wsClient.on('message', function(message) {
-                if(ws.readyState === 1){
-                    ws.send(message);
-                }
-                console.log('подключился к ардуино wss: ' + message);
+
+                const PORT_UDP = 1234;
+                const HOST = '93.125.10.70';
+                const messageUDP = new Buffer(message);
+                const client = dgram.createSocket('udp4');
+                client.send(messageUDP, 0, messageUDP.length, PORT_UDP, HOST, function(err, bytes) {
+                    if (err) throw err;
+                    console.log('UDP message sent to ' + HOST +':'+ PORT_UDP);
+                    client.close();
+                });
+                console.log('подключился к ардуино');
+                /* обработчик сообщений от клиента */
             })
+
         }
 
-        httpServer.listen(8080, () => {
-            console.log('HTTP Server running on port 8080');
+        httpServer.listen(80, () => {
+            console.log('HTTP Server running on port 80');
         });
 
-        httpsServer.listen(4433, () => {
-            console.log('HTTPS Server running on port 4433');
+        httpsServer.listen(443, () => {
+            console.log('HTTPS Server running on port 443');
         });
 
     } catch (e) {
@@ -107,20 +100,3 @@ const start = async () => {
 }
 
 start()
-
-
-const socketTest = (readyState) => {
-    console.log('socketTest')
-    // if(readyState !== 1) {
-    //     console.log('11111111111111')
-    //     ws = new WebSocket('ws://192.168.0.107:81');
-    //     if(readyState === 1) {
-    //         ws.on('open', function open() {
-    //                 ws.send(JSON.stringify({
-    //                     username: 'user',
-    //                     method: "connection",
-    //                 }));
-    //             })
-    //         }
-    // };
-}

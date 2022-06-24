@@ -8,8 +8,8 @@ require('dotenv').config()
 const mongoose = require('mongoose')
 const cors = require('cors')
 const fileUpload = require('express-fileupload')
-const router = require('./routes/index')
-const errorHandler = require('./middleware/ErrorHandlingMiddleware')
+const router = require('../routes')
+const errorHandler = require('../middleware/ErrorHandlingMiddleware')
 
 const path = require('path')
 const app = express();
@@ -20,13 +20,14 @@ app.use(express.static(path.resolve(__dirname, 'static')))
 app.use(fileUpload({}))
 app.use('/api', router)
 
-const privateKey = fs.readFileSync(path.resolve(__dirname,'./cert/servicerobotpro/privkey.pem'));
-const certificate = fs.readFileSync(path.resolve(__dirname,'./cert/servicerobotpro/cert.pem'));
-const ca = fs.readFileSync(path.resolve(__dirname,'./cert/servicerobotpro/chain.pem'));
+// const { v4: uuidv4 } = require('uuid');
+// const privateKey = fs.readFileSync(path.resolve(__dirname,'./cert/servicerobotpro/privkey.pem'));
+// const certificate = fs.readFileSync(path.resolve(__dirname,'./cert/servicerobotpro/cert.pem'));
+// const ca = fs.readFileSync(path.resolve(__dirname,'./cert/servicerobotpro/chain.pem'));
 
-// const privateKey = fs.readFileSync(path.resolve(__dirname,'./cert/umdomby/privkey.pem'));
-// const certificate = fs.readFileSync(path.resolve(__dirname,'./cert/umdomby/cert.pem'));
-// const ca = fs.readFileSync(path.resolve(__dirname,'./cert/umdomby/chain.pem'));
+const privateKey = fs.readFileSync(path.resolve(__dirname,'./cert/umdomby/privkey.pem'));
+const certificate = fs.readFileSync(path.resolve(__dirname,'./cert/umdomby/cert.pem'));
+const ca = fs.readFileSync(path.resolve(__dirname,'./cert/umdomby/chain.pem'));
 
 const credentials = {
     key: privateKey,
@@ -53,9 +54,8 @@ const start = async () => {
             .catch(err => console.error("Connection error", err));
 
         const wss = new WebSocketServer({server: httpsServer});
-
-        wss.on('connection', ws => {
-            ws.on('message', msg => {
+        wss.on('connection', client => {
+            client.on('message', msg => {
                 msg = JSON.parse(msg)
                 switch (msg.method) {
                     case "connection":
@@ -63,21 +63,14 @@ const start = async () => {
                             method: 'connection',
                             username: msg.username,
                             txt:'txt',
-                            degreegoback:'1',
-                            degreeleftright:'1',
-                            delaycommand:'0',
-                            accel:'1',
+                            degreegoback:2,
+                            degreeleftright:1,
+                            delaycommand:1,
+                            accel:1,
                             languages:'ru-RU'
                         })
-                        //ws.send(mess)
+                        //client.send(mess)
                         console.log('connection ' + msg.id + '|' + msg.username)
-                        ws.id = msg.id
-                        wss.clients.forEach(function each(client) {
-                            if (client.id === ws.id && client.readyState === client.OPEN) {
-                                client.send(mess);
-                            }
-                        });
-
                         //connectionHandler2(client, msg, mess);
                         break
                     case "messages":
@@ -85,17 +78,10 @@ const start = async () => {
                             method: 'messages',
                             message: msg.message,
                             message2: msg.message2,
-                            accel: msg.accel,
-                            stop: msg.stop,
+                            stop: 0
                         })
-                        ws.id = msg.id
-                        wss.clients.forEach(function each(client) {
-                            if (client.id === ws.id && client.readyState === client.OPEN) {
-                                client.send(mess2);
-                            }
-                        });
-                        //ws.send(mess2)
-                        //broadcastConnection2(mess2)
+                        //client.send(mess2)
+                        broadcastConnection2(mess2)
                         console.log(msg.id + '|' + msg.message + '|' + msg.message2)
                         break
                 }
@@ -116,12 +102,12 @@ const start = async () => {
         //         }
         //     })
         // }
-        //
-        // broadcastConnection2 = (mess2) => {
-        //     wss.clients.forEach(client => {
-        //         client.send(mess2)
-        //     })
-        // }
+
+        broadcastConnection2 = (mess2) => {
+            wss.clients.forEach(client => {
+                client.send(mess2)
+            })
+        }
 
         httpServer.listen(8080, () => {
             console.log('HTTP Server running on port 8080');

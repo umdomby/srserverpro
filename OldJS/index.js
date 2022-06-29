@@ -57,13 +57,13 @@ app.use(express.static(path.resolve(__dirname, 'static')))
 app.use(fileUpload({}))
 app.use('/api', router)
 
-const privateKey = fs.readFileSync(path.resolve(__dirname,'./cert/servicerobotpro/privkey.pem'));
-const certificate = fs.readFileSync(path.resolve(__dirname,'./cert/servicerobotpro/cert.pem'));
-const ca = fs.readFileSync(path.resolve(__dirname,'./cert/servicerobotpro/chain.pem'));
+// const privateKey = fs.readFileSync(path.resolve(__dirname,'./cert/servicerobotpro/privkey.pem'));
+// const certificate = fs.readFileSync(path.resolve(__dirname,'./cert/servicerobotpro/cert.pem'));
+// const ca = fs.readFileSync(path.resolve(__dirname,'./cert/servicerobotpro/chain.pem'));
 
-// const privateKey = fs.readFileSync(path.resolve(__dirname,'./cert/umdomby/privkey.pem'));
-// const certificate = fs.readFileSync(path.resolve(__dirname,'./cert/umdomby/cert.pem'));
-// const ca = fs.readFileSync(path.resolve(__dirname,'./cert/umdomby/chain.pem'));
+const privateKey = fs.readFileSync(path.resolve(__dirname,'./cert/umdomby/privkey.pem'));
+const certificate = fs.readFileSync(path.resolve(__dirname,'./cert/umdomby/cert.pem'));
+const ca = fs.readFileSync(path.resolve(__dirname,'./cert/umdomby/chain.pem'));
 
 const credentials = {
     key: privateKey,
@@ -78,7 +78,7 @@ app.use((req, res) => {
 // Starting both http & https servers
 const httpServer = http.createServer(app);
 const httpsServer = https.createServer(credentials, app);
-//const httpsServerIO = https.createServer(credentials, app);
+const httpsServerIO = https.createServer(credentials, app);
 //const WebSocket = require('ws');
 //global.arduino = {};
 
@@ -134,9 +134,7 @@ const start = async () => {
                         //         client.send(mess);
                         //     }
                         // });
-                        const clientsMessage = [];
                         wss.clients.forEach(function each(client) {
-                            clientsMessage.push(client.id);
                             console.log('client.id forEach Chrome ' + client.id)
                         });
                         wsa.clients.forEach(function each(client) {
@@ -167,7 +165,7 @@ const start = async () => {
                         // });
                         ws.send(mess2)
                         wsa.clients.forEach(function each(client) {
-                            console.log('client.id forEach arduino ' + client.id)
+                            //console.log('client.id forEach arduino ' + client.id)
                             if (client.id === ws.id && client.readyState === client.OPEN) {
                                 wsg.send(mess2)
                             }
@@ -262,9 +260,9 @@ const start = async () => {
         httpsServer.listen(4433, () => {
             console.log('HTTPS Server running on port 4433');
         });
-        // httpsServerIO.listen(4434, () => {
-        //     console.log('HTTPS Server SocketIO running on port 4434');
-        // });
+        httpsServerIO.listen(4434, () => {
+            console.log('HTTPS Server SocketIO running on port 4434');
+        });
 
 
     } catch (e) {

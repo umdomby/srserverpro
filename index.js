@@ -102,8 +102,8 @@ const start = async () => {
 
                         // const dencrypted = encrypter.dencrypt(msg.id);
                         // wsg.id = dencrypted
-                        // console.log('Connected Arduino id ' + dencrypted)
-                        wsg.id = '123'
+                        console.log('Connected Arduino id ' + msg.id)
+                        wsg.id = msg.id //123
                         break;
                     case "messages":
                         console.log('Arduino '+ msg.id + '|' + msg.message + '|' + msg.message2)
@@ -137,10 +137,10 @@ const start = async () => {
                         const clientsMessage = [];
                         wss.clients.forEach(function each(client) {
                             clientsMessage.push(client.id);
-                            console.log('client.id forEach Chrome ' + client.id)
+                            console.log('client.id connection Chrome ' + client.id)
                         });
                         wsa.clients.forEach(function each(client) {
-                            console.log('client.id forEach arduino ' + client.id)
+                            console.log('client.id connection arduino ' + client.id)
                         });
                         const mess = JSON.stringify({
                             method: 'connection',
@@ -167,7 +167,7 @@ const start = async () => {
                         // });
                         ws.send(mess2)
                         wsa.clients.forEach(function each(client) {
-                            console.log('client.id forEach arduino ' + client.id)
+                            console.log('client.id messages arduino ' + client.id)
                             if (client.id === ws.id && client.readyState === client.OPEN) {
                                 wsg.send(mess2)
                             }

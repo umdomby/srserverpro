@@ -106,7 +106,7 @@ const start = async () => {
                         wsg.id = msg.id //123
                         break;
                     case "messages":
-                        console.log('Arduino '+ msg.id + '|' + msg.message + '|' + msg.message2)
+                        // console.log('Arduino '+ msg.id + '|' + msg.messageX + '|' + msg.messageY)
                         // wsa.clients.forEach(function each(client) {
                         //     console.log('client.id arduino ' + client.id)
                         //
@@ -152,12 +152,12 @@ const start = async () => {
                     case "messages":
                         let mess2 = JSON.stringify({
                             method: 'messages',
-                            message: msg.message,
-                            message2: msg.message2,
+                            messageX: msg.messageX,
+                            messageY: msg.messageY,
                             accel: msg.accel,
                             stop: msg.stop,
                         })
-                        console.log('Chrome '+ msg.id + '|' + msg.message + '|' + msg.message2)
+                        console.log('Chrome messagesXY '+ msg.id + '|' + msg.messageX + '|' + msg.messageY + ' | ' + "method " + msg.method)
 
                         // wss.clients.forEach(function each(client) {
                         //     // console.log('client.id forEach Chrome ' + client.id)
@@ -167,9 +167,32 @@ const start = async () => {
                         // });
                         ws.send(mess2)
                         wsa.clients.forEach(function each(client) {
-                            console.log('client.id messages arduino ' + client.id)
+                            console.log('messagesXY in arduino' + client.id + ' | ' + "method " + msg.method)
                             if (client.id === ws.id && client.readyState === client.OPEN) {
                                 wsg.send(mess2)
+                            }
+                        });
+                        break;
+                    case "messagesY":
+                        let mess3 = JSON.stringify({
+                            method: 'messagesY',
+                            messageY: msg.messageY,
+                            accel: msg.accel,
+                            stop: msg.stop,
+                        })
+                        console.log('Chrome messagesY'+ msg.id + ' | ' + msg.messageY + ' | ' + "method " + msg.method)
+
+                        // wss.clients.forEach(function each(client) {
+                        //     // console.log('client.id forEach Chrome ' + client.id)
+                        //     // if (client.id === ws.id && client.readyState === client.OPEN) {
+                        //     //     client.send(mess2);
+                        //     // }
+                        // });
+                        ws.send(mess3)
+                        wsa.clients.forEach(function each(client) {
+                            console.log('messagesY in arduino ' + client.id)
+                            if (client.id === ws.id && client.readyState === client.OPEN) {
+                                wsg.send(mess3)
                             }
                         });
                         break;
@@ -256,8 +279,8 @@ const start = async () => {
         // });
 
 
-        httpServer.listen(81, () => {
-            console.log('HTTP Server running on port 81');
+        httpServer.listen(8081, () => {
+            console.log('HTTP Server running on port 8081');
         });
         httpsServer.listen(4433, () => {
             console.log('HTTPS Server running on port 4433');

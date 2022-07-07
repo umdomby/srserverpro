@@ -106,10 +106,9 @@ const start = async () => {
                         wsg.id = msg.id //123
                         break;
                     case "messages":
-                        // console.log('Arduino '+ msg.id + '|' + msg.messageL + '|' + msg.messageR)
+                        console.log('Arduino '+ msg.id + '|' + msg.messageL + '|' + msg.messageR)
                         // wsa.clients.forEach(function each(client) {
                         //     console.log('client.id arduino ' + client.id)
-                        //
                         //     // if (client.id === wsg.id && client.readyState === client.OPEN) {
                         //     //     wsg.send(mess2)
                         //     // }

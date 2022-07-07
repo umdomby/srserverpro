@@ -152,10 +152,11 @@ const start = async () => {
                         let mess2 = JSON.stringify({
                             method: 'messagesL',
                             messageL: msg.messageL,
+                            messageR: msg.messageR,
                             accel: msg.accel,
                             stop: msg.stop,
                         })
-                        console.log('Chrome messagesL '+ msg.id + ' | ' + msg.messageL + ' | '  + "method " + msg.method)
+                        console.log('Chrome messagesL'+ msg.id + ' | R: ' + msg.messageR + ' | L: '+ msg.messageL + ' | ' + " method " + msg.method)
 
                         // wss.clients.forEach(function each(client) {
                         //     // console.log('client.id forEach Chrome ' + client.id)
@@ -176,10 +177,11 @@ const start = async () => {
                         let mess3 = JSON.stringify({
                             method: 'messagesR',
                             messageR: msg.messageR,
+                            messageL: msg.messageL,
                             accel: msg.accel,
                             stop: msg.stop,
                         })
-                        console.log('Chrome messagesR'+ msg.id + ' | ' + msg.messageR + ' | '+ "method " + msg.method)
+                        console.log('Chrome messagesR'+ msg.id + ' | R: ' + msg.messageR + ' | L: '+ msg.messageL + ' | ' + " method " + msg.method)
 
                         // wss.clients.forEach(function each(client) {
                         //     // console.log('client.id forEach Chrome ' + client.id)

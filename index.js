@@ -148,15 +148,14 @@ const start = async () => {
                         ws.send(mess)
                         break;
 
-                    case "messagesLR":
+                    case "messagesL":
                         let mess2 = JSON.stringify({
-                            method: 'messagesLR',
+                            method: 'messagesL',
                             messageL: msg.messageL,
-                            messageR: msg.messageR,
                             accel: msg.accel,
                             stop: msg.stop,
                         })
-                        console.log('Chrome messagesLR '+ msg.id + '|' + msg.messageL + '|' + msg.messageR + ' | ' + "method " + msg.method)
+                        console.log('Chrome messagesL '+ msg.id + ' | ' + msg.messageL + ' | '  + "method " + msg.method)
 
                         // wss.clients.forEach(function each(client) {
                         //     // console.log('client.id forEach Chrome ' + client.id)
@@ -167,21 +166,20 @@ const start = async () => {
 
                         ws.send(mess2)
                         wsa.clients.forEach(function each(client) {
-                            console.log('messagesLR in arduino' + client.id + ' | ' + "method " + msg.method)
+                            console.log('messagesL in arduino' + client.id + ' | ' + "method " + msg.method)
                             if (client.id === ws.id && client.readyState === client.OPEN) {
                                 wsg.send(mess2)
                             }
                         });
                         break;
-                    case "messagesY":
+                    case "messagesR":
                         let mess3 = JSON.stringify({
-                            method: 'messagesY',
+                            method: 'messagesR',
                             messageR: msg.messageR,
-                            messageL: msg.messageL,
                             accel: msg.accel,
                             stop: msg.stop,
                         })
-                        console.log('Chrome messagesY'+ msg.id + ' | ' + msg.messageL + ' | ' + msg.messageR + ' | '+ "method " + msg.method)
+                        console.log('Chrome messagesR'+ msg.id + ' | ' + msg.messageR + ' | '+ "method " + msg.method)
 
                         // wss.clients.forEach(function each(client) {
                         //     // console.log('client.id forEach Chrome ' + client.id)
@@ -191,7 +189,7 @@ const start = async () => {
                         // });
                         ws.send(mess3)
                         wsa.clients.forEach(function each(client) {
-                            console.log('messagesY in arduino ' + client.id)
+                            console.log('messagesR in arduino ' + client.id)
                             if (client.id === ws.id && client.readyState === client.OPEN) {
                                 wsg.send(mess3)
                             }

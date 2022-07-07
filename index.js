@@ -57,13 +57,13 @@ app.use(express.static(path.resolve(__dirname, 'static')))
 app.use(fileUpload({}))
 app.use('/api', router)
 
-const privateKey = fs.readFileSync(path.resolve(__dirname,'./cert/servicerobotpro/privkey.pem'));
-const certificate = fs.readFileSync(path.resolve(__dirname,'./cert/servicerobotpro/cert.pem'));
-const ca = fs.readFileSync(path.resolve(__dirname,'./cert/servicerobotpro/chain.pem'));
+// const privateKey = fs.readFileSync(path.resolve(__dirname,'./cert/servicerobotpro/privkey.pem'));
+// const certificate = fs.readFileSync(path.resolve(__dirname,'./cert/servicerobotpro/cert.pem'));
+// const ca = fs.readFileSync(path.resolve(__dirname,'./cert/servicerobotpro/chain.pem'));
 
-// const privateKey = fs.readFileSync(path.resolve(__dirname,'./cert/umdomby/privkey.pem'));
-// const certificate = fs.readFileSync(path.resolve(__dirname,'./cert/umdomby/cert.pem'));
-// const ca = fs.readFileSync(path.resolve(__dirname,'./cert/umdomby/chain.pem'));
+const privateKey = fs.readFileSync(path.resolve(__dirname,'./cert/umdomby/privkey.pem'));
+const certificate = fs.readFileSync(path.resolve(__dirname,'./cert/umdomby/cert.pem'));
+const ca = fs.readFileSync(path.resolve(__dirname,'./cert/umdomby/chain.pem'));
 
 const credentials = {
     key: privateKey,
@@ -106,7 +106,7 @@ const start = async () => {
                         wsg.id = msg.id //123
                         break;
                     case "messages":
-                        // console.log('Arduino '+ msg.id + '|' + msg.messageX + '|' + msg.messageY)
+                        // console.log('Arduino '+ msg.id + '|' + msg.messageL + '|' + msg.messageR)
                         // wsa.clients.forEach(function each(client) {
                         //     console.log('client.id arduino ' + client.id)
                         //
@@ -149,15 +149,15 @@ const start = async () => {
                         ws.send(mess)
                         break;
 
-                    case "messages":
+                    case "messagesLR":
                         let mess2 = JSON.stringify({
-                            method: 'messages',
-                            messageX: msg.messageX,
-                            messageY: msg.messageY,
+                            method: 'messagesLR',
+                            messageL: msg.messageL,
+                            messageR: msg.messageR,
                             accel: msg.accel,
                             stop: msg.stop,
                         })
-                        console.log('Chrome messagesXY '+ msg.id + '|' + msg.messageX + '|' + msg.messageY + ' | ' + "method " + msg.method)
+                        console.log('Chrome messagesLR '+ msg.id + '|' + msg.messageL + '|' + msg.messageR + ' | ' + "method " + msg.method)
 
                         // wss.clients.forEach(function each(client) {
                         //     // console.log('client.id forEach Chrome ' + client.id)
@@ -165,9 +165,10 @@ const start = async () => {
                         //     //     client.send(mess2);
                         //     // }
                         // });
+
                         ws.send(mess2)
                         wsa.clients.forEach(function each(client) {
-                            console.log('messagesXY in arduino' + client.id + ' | ' + "method " + msg.method)
+                            console.log('messagesLR in arduino' + client.id + ' | ' + "method " + msg.method)
                             if (client.id === ws.id && client.readyState === client.OPEN) {
                                 wsg.send(mess2)
                             }
@@ -176,11 +177,12 @@ const start = async () => {
                     case "messagesY":
                         let mess3 = JSON.stringify({
                             method: 'messagesY',
-                            messageY: msg.messageY,
+                            messageR: msg.messageR,
+                            messageL: msg.messageL,
                             accel: msg.accel,
                             stop: msg.stop,
                         })
-                        console.log('Chrome messagesY'+ msg.id + ' | ' + msg.messageY + ' | ' + "method " + msg.method)
+                        console.log('Chrome messagesY'+ msg.id + ' | ' + msg.messageL + ' | ' + msg.messageR + ' | '+ "method " + msg.method)
 
                         // wss.clients.forEach(function each(client) {
                         //     // console.log('client.id forEach Chrome ' + client.id)

@@ -39,6 +39,7 @@ const http = require('http');
 const https = require('https');
 const express = require('express');
 const WebSocketServer = require('ws').Server;
+//const WebSocket = require('ws');
 
 require('dotenv').config()
 const mongoose = require('mongoose')
@@ -82,7 +83,14 @@ const httpsServer = https.createServer(credentials, app);
 //const WebSocket = require('ws');
 //global.arduino = {};
 
+var clientsWSS = {};
+var clientsWSA = {};
+
+
+
+
 const start = async () => {
+
     try {
         await mongoose.connect(process.env.DATABASE_URL)
             .then(() => console.log("Successfully connect to MongoDB."))
@@ -91,28 +99,26 @@ const start = async () => {
         // var wsa = new WebSocket('ws://192.168.0.107:81');
         // wsa.on('error', err => { console.error(err) })
 
+
+
         const wsa = new WebSocketServer({server: httpServer});
         wsa.on('connection', ws => {
-            global.wsg = ws
+            ws.isAlive = true;
+            ws.on('pong', heartbeat);
+            //global.wsg = ws
             ws.send('connected WS server')
             ws.on('message', msg => {
                 msg = JSON.parse(msg)
                 switch (msg.method) {
                     case "connection":
-
                         // const dencrypted = encrypter.dencrypt(msg.id);
                         // wsg.id = dencrypted
                         console.log('Connected Arduino id ' + msg.id)
-                        wsg.id = msg.id //123
+                        ws.id = msg.id
                         break;
                     case "messages":
                         console.log('Arduino '+ msg.id + '|' + msg.messageL + '|' + msg.messageR)
-                        // wsa.clients.forEach(function each(client) {
-                        //     console.log('client.id arduino ' + client.id)
-                        //     // if (client.id === wsg.id && client.readyState === client.OPEN) {
-                        //     //     wsg.send(mess2)
-                        //     // }
-                        // });
+
                         break;
                     default:
                         //console.log('default')
@@ -120,6 +126,23 @@ const start = async () => {
             })
 
         })
+
+        function heartbeat() {
+            this.isAlive = true;
+        }
+
+        const interval = setInterval(function ping() {
+            wsa.clients.forEach(function each(ws) {
+                if (ws.isAlive === false) return ws.terminate();
+                ws.isAlive = false;
+                ws.ping();
+                console.log('Arduino client.id ' + ws.id + ' OPEN ')
+            });
+        }, 5000);
+
+        wsa.on('close', function close() {
+            clearInterval(interval);
+        });
 
         const wss = new WebSocketServer({server: httpsServer});
         wss.on('connection', ws => {
@@ -129,11 +152,6 @@ const start = async () => {
                     case "connection":
                         console.log('Connected Chrome id ' + msg.id)
                         ws.id = msg.id
-                        // wss.clients.forEach(function each(client) {
-                        //     if (client.id === ws.id && client.readyState === client.OPEN) {
-                        //         client.send(mess);
-                        //     }
-                        // });
                         wss.clients.forEach(function each(client) {
                             console.log('client.id connection Chrome ' + client.id)
                         });
@@ -144,7 +162,7 @@ const start = async () => {
                             method: 'connection',
                             id: msg.id,
                         })
-                        ws.send(mess)
+                        wssSend(mess, ws)
                         break;
 
                     case "messagesL":
@@ -156,13 +174,8 @@ const start = async () => {
                             stop: msg.stop,
                         })
                         console.log('Chrome messagesL'+ msg.id + ' | R: ' + msg.messageR + ' | L: '+ msg.messageL + ' | ' + " method " + msg.method)
-                        ws.send(mess2)
-                        wsa.clients.forEach(function each(client) {
-                            console.log('messagesL in arduino' + client.id + ' | ' + "method " + msg.method)
-                            if (client.id === ws.id && client.readyState === client.OPEN) {
-                                wsg.send(mess2)
-                            }
-                        });
+                        wssSend(mess2, ws)
+                        wsaSend(mess2, ws)
                         break;
                     case "messagesR":
                         let mess3 = JSON.stringify({
@@ -173,32 +186,38 @@ const start = async () => {
                             stop: msg.stop,
                         })
                         console.log('Chrome messagesR'+ msg.id + ' | R: ' + msg.messageR + ' | L: '+ msg.messageL + ' | ' + " method " + msg.method)
-                        ws.send(mess3)
-                        wsa.clients.forEach(function each(client) {
-                            console.log('messagesR in arduino ' + client.id)
-                            if (client.id === ws.id && client.readyState === client.OPEN) {
-                                wsg.send(mess3)
-                            }
-                        });
+                        wssSend(mess3, ws)
+                        wsaSend(mess3, ws)
                         break;
                     case "messagesOnOff":
                         let mess4 = JSON.stringify({
                             method: 'messagesOnOff',
                             messageOnOff: msg.messageOnOff,
                         })
-                        console.log('Chrome messageOnOff '+ msg.messageOnOff)
-                        ws.send(mess4)
-                        wsa.clients.forEach(function each(client) {
-                            if (client.id === ws.id && client.readyState === client.OPEN) {
-                                wsg.send(mess4)
-                            }
-                        });
+                        console.log('Chrome messageOnOff '+ msg.messageOnOff + ' id ' + msg.id)
+                        wssSend(mess4, ws)
+                        wsaSend(mess4, ws)
                         break;
                     default:
                         //console.log('default')
                 }
             })
         })
+
+        const wsaSend = (mess, ws)=> {
+            wsa.clients.forEach(function each(client) {
+                if (client.id === ws.id && client.readyState === client.OPEN) {
+                    client.send(mess)
+                }
+            });
+        }
+        const wssSend = (mess, ws)=> {
+            wss.clients.forEach(function each(client) {
+                if (client.id === ws.id && client.readyState === client.OPEN) {
+                    client.send(mess)
+                }
+            });
+        }
 
         // const io = require('socket.io')(httpsServerIO);
         // let socketList = {};

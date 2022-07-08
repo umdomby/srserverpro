@@ -114,6 +114,8 @@ const start = async () => {
                         //     // }
                         // });
                         break;
+                    default:
+                        //console.log('default')
                 }
             })
 
@@ -126,16 +128,13 @@ const start = async () => {
                 switch (msg.method) {
                     case "connection":
                         console.log('Connected Chrome id ' + msg.id)
-
                         ws.id = msg.id
                         // wss.clients.forEach(function each(client) {
                         //     if (client.id === ws.id && client.readyState === client.OPEN) {
                         //         client.send(mess);
                         //     }
                         // });
-                        const clientsMessage = [];
                         wss.clients.forEach(function each(client) {
-                            clientsMessage.push(client.id);
                             console.log('client.id connection Chrome ' + client.id)
                         });
                         wsa.clients.forEach(function each(client) {
@@ -157,14 +156,6 @@ const start = async () => {
                             stop: msg.stop,
                         })
                         console.log('Chrome messagesL'+ msg.id + ' | R: ' + msg.messageR + ' | L: '+ msg.messageL + ' | ' + " method " + msg.method)
-
-                        // wss.clients.forEach(function each(client) {
-                        //     // console.log('client.id forEach Chrome ' + client.id)
-                        //     // if (client.id === ws.id && client.readyState === client.OPEN) {
-                        //     //     client.send(mess2);
-                        //     // }
-                        // });
-
                         ws.send(mess2)
                         wsa.clients.forEach(function each(client) {
                             console.log('messagesL in arduino' + client.id + ' | ' + "method " + msg.method)
@@ -182,13 +173,6 @@ const start = async () => {
                             stop: msg.stop,
                         })
                         console.log('Chrome messagesR'+ msg.id + ' | R: ' + msg.messageR + ' | L: '+ msg.messageL + ' | ' + " method " + msg.method)
-
-                        // wss.clients.forEach(function each(client) {
-                        //     // console.log('client.id forEach Chrome ' + client.id)
-                        //     // if (client.id === ws.id && client.readyState === client.OPEN) {
-                        //     //     client.send(mess2);
-                        //     // }
-                        // });
                         ws.send(mess3)
                         wsa.clients.forEach(function each(client) {
                             console.log('messagesR in arduino ' + client.id)
@@ -197,6 +181,21 @@ const start = async () => {
                             }
                         });
                         break;
+                    case "messagesOnOff":
+                        let mess4 = JSON.stringify({
+                            method: 'messagesOnOff',
+                            messageOnOff: msg.messageOnOff,
+                        })
+                        console.log('Chrome messageOnOff '+ msg.messageOnOff)
+                        ws.send(mess4)
+                        wsa.clients.forEach(function each(client) {
+                            if (client.id === ws.id && client.readyState === client.OPEN) {
+                                wsg.send(mess4)
+                            }
+                        });
+                        break;
+                    default:
+                        //console.log('default')
                 }
             })
         })

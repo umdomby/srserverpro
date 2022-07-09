@@ -125,7 +125,7 @@ const start = async () => {
                             method: 'messagesFBL',
                             messageFBL: msg.messageFBL,
                         })
-                        console.log('From arduino messageFBL '+ 'id ' + msg.id + 'msg.messageFBL ' + msg.messageFBL)
+                        console.log('From arduino messageFBL '+ 'id ' + msg.id + ' messageFBL ' + msg.messageFBL)
                         wssSend(mess6, ws)
                         break;
 
@@ -134,8 +134,17 @@ const start = async () => {
                             method: 'messagesFBR',
                             messageFBR: msg.messageFBR,
                         })
-                        console.log('From arduino messageFBR '+ 'id ' + msg.id + 'msg.messageFBR ' + msg.messageFBR)
+                        console.log('From arduino messageFBR '+ 'id ' + msg.id + ' messageFBR ' + msg.messageFBR)
                         wssSend(mess7, ws)
+                        break;
+
+                    case "messagesOnOff":
+                        let mess8 = JSON.stringify({
+                            method: 'messagesOnOff',
+                            messageOnOff: msg.messageOnOff,
+                        })
+                        console.log('From arduino messageOnOff '+ 'id ' + msg.id + ' messageOnOff ' + msg.messageOnOff)
+                        wssSend(mess8, ws)
                         break;
 
 

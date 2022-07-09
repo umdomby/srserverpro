@@ -198,6 +198,15 @@ const start = async () => {
                         wssSend(mess4, ws)
                         wsaSend(mess4, ws)
                         break;
+                    case "messagesStop":
+                        let mess5 = JSON.stringify({
+                            method: 'messagesStop',
+                            messageStop: msg.messageStop,
+                        })
+                        console.log('Chrome messageStop '+ 'id true' + msg.id)
+                        wssSend(mess5, ws)
+                        wsaSend(mess5, ws)
+                        break;
                     default:
                         //console.log('default')
                 }

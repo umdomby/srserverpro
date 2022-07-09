@@ -203,10 +203,31 @@ const start = async () => {
                             method: 'messagesStop',
                             messageStop: msg.messageStop,
                         })
-                        console.log('Chrome messageStop '+ 'id true' + msg.id)
+                        console.log('Chrome messageStop '+ 'id ' + msg.id)
                         wssSend(mess5, ws)
                         wsaSend(mess5, ws)
                         break;
+
+                    case "messagesFBL":
+                        let mess6 = JSON.stringify({
+                            method: 'messagesFBL',
+                            messageFBL: msg.messageFBL,
+                        })
+                        console.log('Chrome messageFBL '+ 'id ' + msg.id)
+                        wssSend(mess6, ws)
+                        wsaSend(mess6, ws)
+                        break;
+
+                    case "messagesFBR":
+                        let mess7 = JSON.stringify({
+                            method: 'messagesFBR',
+                            messageFBR: msg.messageFBR,
+                        })
+                        console.log('Chrome messageFBR '+ 'id ' + msg.id)
+                        wssSend(mess7, ws)
+                        wsaSend(mess7, ws)
+                        break;
+
                     default:
                         //console.log('default')
                 }

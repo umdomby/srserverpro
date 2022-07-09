@@ -118,6 +118,32 @@ const start = async () => {
                         break;
                     case "messages":
                         console.log('Arduino '+ msg.id + '|' + msg.messageL + '|' + msg.messageR)
+                        break;
+
+                    case "messagesFBL":
+                        let mess6 = JSON.stringify({
+                            method: 'messagesFBL',
+                            messageFBL: msg.messageFBL,
+                        })
+                        console.log('From arduino messageFBL '+ 'id ' + msg.id + 'msg.messageFBL ' + msg.messageFBL)
+                        wssSend(mess6, ws)
+                        break;
+
+                    case "messagesFBR":
+                        let mess7 = JSON.stringify({
+                            method: 'messagesFBR',
+                            messageFBR: msg.messageFBR,
+                        })
+                        console.log('From arduino messageFBR '+ 'id ' + msg.id + 'msg.messageFBR ' + msg.messageFBR)
+                        wssSend(mess7, ws)
+                        break;
+
+
+                    // case "messagesFBL":
+                    //     console.log('Arduino FBL '+ msg.id + ' | ' + msg.messageFBL)
+                    //     break;
+                    // case "messagesFBR":
+                    //     console.log('Arduino FBR '+ msg.id + ' | ' + msg.messageFBR)
 
                         break;
                     default:
@@ -214,7 +240,7 @@ const start = async () => {
                             messageFBL: msg.messageFBL,
                         })
                         console.log('Chrome messageFBL '+ 'id ' + msg.id)
-                        wssSend(mess6, ws)
+                        //wssSend(mess6, ws)
                         wsaSend(mess6, ws)
                         break;
 
@@ -224,7 +250,7 @@ const start = async () => {
                             messageFBR: msg.messageFBR,
                         })
                         console.log('Chrome messageFBR '+ 'id ' + msg.id)
-                        wssSend(mess7, ws)
+                        //wssSend(mess7, ws)
                         wsaSend(mess7, ws)
                         break;
 

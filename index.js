@@ -83,11 +83,6 @@ const httpsServer = https.createServer(credentials, app);
 //const WebSocket = require('ws');
 //global.arduino = {};
 
-var clientsWSS = {};
-var clientsWSA = {};
-
-
-
 
 const start = async () => {
 

@@ -91,10 +91,6 @@ const start = async () => {
             .then(() => console.log("Successfully connect to MongoDB."))
             .catch(err => console.error("Connection error", err));
 
-        // var wsa = new WebSocket('ws://192.168.0.107:81');
-        // wsa.on('error', err => { console.error(err) })
-
-
 
         const wsa = new WebSocketServer({server: httpServer});
         wsa.on('connection', ws => {
